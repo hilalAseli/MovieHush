@@ -17,7 +17,7 @@ import { useUser } from "@clerk/clerk-expo";
 import Vcol from "../component/Vcol";
 import { collection, doc, getDocs, query, setDoc } from "firebase/firestore";
 import { db } from "../config/Firebase";
-
+import { Rating } from "react-native-ratings";
 export default function Detail({ route }) {
   const { movieId, isTvSeries } = route.params;
 
@@ -214,62 +214,98 @@ export default function Detail({ route }) {
           >
             Prolog
           </Text>
-          <Text
-            style={{
-              color: "gray",
-              fontSize: 14,
-              marginTop: 10,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
-            {movieDetails.overview}
-          </Text>
+          {movieDetails.overview ? (
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                marginTop: 10,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              {movieDetails.overview}
+            </Text>
+          ) : (
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                marginTop: 10,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              Prolog Tidak Tersedia :(
+            </Text>
+          )}
         </Vcol>
-      {isTvSeries ? (
-        <Vrow justifyContent="space-between" padding="15px">
+        <Vrow padding="15px" align="center">
+          <Rating
+            type="star"
+            imageSize={20}
+            readonly
+            startingValue={movieDetails.vote_average / 2}
+            tintColor="black"
+            ratingColor="gold"
+            ratingBackgroundColor="gray"
+            style={{ marginRight: 10 }}
+          />
           <Text
             style={{
-              color: "gray",
-              fontSize: 14,
+              color: "white",
+              fontSize: 16,
               fontFamily: "Poppins_400Regular",
             }}
           >
-            Total episode: {movieDetails.last_episode_to_air.episode_number}
-          </Text>
-          <Text
-            style={{
-              color: "gray",
-              fontSize: 14,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
-            Tanggal Rilis:{" "}
-            {new Date(movieDetails.first_air_date).toLocaleDateString()}
-          </Text>
-        </Vrow>
-      ) : (
-        <Vrow justifyContent="space-between" padding="15px">
-          <Text
-            style={{
-              color: "gray",
-              fontSize: 14,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
-            Durasi: {Math.floor(movieDetails.runtime / 60)} jam {movieDetails.runtime % 60} menit
-          </Text>
-          <Text
-            style={{
-              color: "gray",
-              fontSize: 14,
-              fontFamily: "Poppins_400Regular",
-            }}
-          >
-            Tanggal Rilis:{" "}
-            {new Date(movieDetails.release_date).toLocaleDateString()}
+            {movieDetails.vote_average.toFixed(1)} / 10
           </Text>
         </Vrow>
-      )}
+
+        {isTvSeries ? (
+          <Vrow justifyContent="space-between" padding="15px">
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              Total episode: {movieDetails.last_episode_to_air.episode_number}
+            </Text>
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              Tanggal Rilis:{" "}
+              {new Date(movieDetails.first_air_date).toLocaleDateString()}
+            </Text>
+          </Vrow>
+        ) : (
+          <Vrow justifyContent="space-between" padding="15px">
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              Durasi: {Math.floor(movieDetails.runtime / 60)} jam{" "}
+              {movieDetails.runtime % 60} menit
+            </Text>
+            <Text
+              style={{
+                color: "gray",
+                fontSize: 14,
+                fontFamily: "Poppins_400Regular",
+              }}
+            >
+              Tanggal Rilis:{" "}
+              {new Date(movieDetails.release_date).toLocaleDateString()}
+            </Text>
+          </Vrow>
+        )}
 
         <Vcol padding="15px">
           <Text

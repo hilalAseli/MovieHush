@@ -51,7 +51,7 @@ export default function MorePage({ route }) {
     } else {
       setShowSearch(true);
       Animated.timing(inputWidth, {
-        toValue: 300,
+        toValue: 200,
         duration: 400,
         useNativeDriver: false,
       }).start();
@@ -80,6 +80,13 @@ export default function MorePage({ route }) {
     <Container bgColor="black">
       <View style={{ margin: 10 }}>
         <Vrow align="center" justifyContent="space-between">
+        <IconButton
+            size={30}
+            onPress={() => navigation.goBack()}
+            icon={"arrow-left"}
+            style={{backgroundColor:'gray'}}
+            iconColor="white"
+          />
           <Animated.View style={{ width: inputWidth }}>
             {showSearch ? (
               <Searchbar
