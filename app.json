@@ -2,14 +2,14 @@
   "expo": {
     "scheme": "MovieHush",
     "name": "MovieHush",
-    "slug": "MovieHush",
+    "slug": "moviehush",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo3.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/logggo.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,13 +20,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.expohilal.MovieHush"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0cb0d62f-dbbb-4872-b761-dc01920455b0"
+      }
+    },
+    "owner": "expohilalganteng"
   }
 }

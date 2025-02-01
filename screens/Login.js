@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useCallback, useEffect } from "react";
 import Container from "../component/Container";
 import { IconButton } from "react-native-paper";
@@ -18,7 +18,7 @@ export default function Login() {
   const handleLogin = useCallback(async () => {
     try {
       const { createdSessionId, setActive } = await startOAuthFlow({
-        redirectUrl: Linking.createURL("/Home", { scheme: "MovieHush" }),
+        redirectUrl: Linking.createURL("/Hometabs", { scheme: "MovieHush" }),
       });
       if (createdSessionId) {
         setActive({ session: createdSessionId });
@@ -29,7 +29,7 @@ export default function Login() {
       console.log(err, "invalid");
     }
   }, [startOAuthFlow]);
-  
+
   return (
     <Container bgColor="black">
       <View style={{ marginTop: 100, alignItems: "center" }}>
@@ -37,7 +37,7 @@ export default function Login() {
           style={{
             fontSize: 35,
             fontWeight: "bold",
-            color: "tomato",
+            color: "red",
             marginBottom: 20,
             textAlign: "center",
           }}
@@ -53,14 +53,23 @@ export default function Login() {
             opacity: 0.8,
           }}
         >
-          Login untuk mulai dan nikmati dunia film tak terbatas.
+          Masuk dan mulai dan nikmati dunia film tak terbatas.
         </Text>
       </View>
-
+      <View style={{alignItems:'center',justifyContent:'center'}}>
+        <Image
+          source={require("../assets/logo.png")}
+          style={{ width: 300, height: 300 }}
+        />
+        {/* <Image
+          source={require("../assets/Login.png")}
+          style={{ width: 300, height: 300 }}
+        /> */}
+      </View>
       <View style={{ margin: 30 }}>
         <TouchableOpacity
           style={{
-            backgroundColor: "tomato",
+            backgroundColor: "red",
             borderRadius: 10,
             flexDirection: "row",
             alignItems: "center",
@@ -68,7 +77,7 @@ export default function Login() {
           onPress={handleLogin}
           activeOpacity={0.8}
         >
-          <IconButton icon="movie-roll" color="white" size={30} />
+          <IconButton icon="movie-roll" iconColor="white" size={30} />
           <Text
             style={{
               color: "white",

@@ -15,7 +15,7 @@ export default function Route() {
     prefixes: ["MovieHush://"],
     config: {
       screens: {
-        Home: "Home",
+        Hometabs: "Hometabs",
         Login: "Login",
       },
     },

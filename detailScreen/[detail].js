@@ -130,7 +130,7 @@ export default function Detail({ route }) {
           justifyContent: "center",
         }}
       >
-        <ActivityIndicator size={"large"} color={"tomato"} />
+        <ActivityIndicator size={"large"} color={"red"} />
       </View>
     );
   }

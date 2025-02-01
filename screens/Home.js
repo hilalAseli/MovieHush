@@ -5,23 +5,38 @@ import axios from "axios";
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   FlatList,
   Image,
   ScrollView,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
 import { Card, IconButton, Searchbar } from "react-native-paper";
 import { useUser } from "@clerk/clerk-expo";
 import { useNavigation } from "@react-navigation/native";
-
+import Carousel from "react-native-reanimated-carousel";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+} from "firebase/firestore";
+import { db } from "../config/Firebase";
 export default function Home() {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
-  const [dataFetch, setDataFetch] = useState({});
-
+  const [dataFetch, setDataFetch] = useState([]);
+  const [dataBanner, setDataBanner] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [heart, setHeart] = useState(false);
+  const width = Dimensions.get("window").width;
   const API_KEY = "f1039e750b66732eb02758bb918b0190";
   const TRENDING_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
   const TOP_RATED = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
@@ -43,40 +58,196 @@ export default function Home() {
       console.log(err);
     }
   };
+
+  const heartHandle = async (movieId) => {
+    setHeart(false);
+    try {
+      const q = query(collection(db, "FavoriteList"));
+      const snapshot = await getDocs(q);
+      const alreadyData = snapshot.docs.some((item) => {
+        const data = item.data();
+        return (
+          data.user_email === user.primaryEmailAddress.emailAddress &&
+          data.movieId === movieId
+        );
+      });
+      if (!alreadyData) {
+        const docId = `${user.fullName}-${new Date().getTime()}`;
+        await setDoc(doc(db, "FavoriteList", docId), {
+          user_email: user?.primaryEmailAddress.emailAddress,
+          movieId: movieId,
+          user_name: user?.fullName,
+          created_at: new Date().toISOString(),
+          userAddItem: movieId,
+        });
+        setHeart(true);
+        ToastAndroid.show(
+          "Film berhasil di tambahkan di list favorit",
+          ToastAndroid.BOTTOM
+        );
+      } else {
+        setHeart(false);
+        ToastAndroid.show(
+          "Film sudah pernah anda tambahkan di list favorit",
+          ToastAndroid.BOTTOM
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const apiBannerOnly = async () => {
+    setLoading(true);
+    try {
+      const trendingbanner = await axios.get(TRENDING_URL);
+      const topratedbanner = await axios.get(TOP_RATED);
+      const tvseriesbanner = await axios.get(TV_SERIES);
+
+      const combineData = [
+        ...trendingbanner.data.results,
+        ...topratedbanner.data.results,
+        ...tvseriesbanner.data.results,
+      ];
+      setDataBanner(combineData);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
+    apiBannerOnly();
     fetchPopularMovies();
   }, []);
   return (
-    <ScrollView>
+    <ScrollView style={{backgroundColor:'black'}}>
       <Container bgColor="black">
-        <View style={{ marginTop: 25 }}>
-          <Vrow justifyContent="space-between" align="center">
-            <TouchableOpacity
-              onPress={() => navigation.navigate("menuaccount")}
-            >
-              <View>
-                <Image
-                  source={{ uri: user.imageUrl }}
-                  style={{
-                    height: 60,
-                    width: 60,
-                    borderRadius: 99,
-                    borderWidth: 2,
-                    borderColor: "white",
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-            <Image
-              source={require("../assets/logggo.jpg")}
+        <View style={{ alignItems: "center" }}>
+          {loading ? (
+            <ActivityIndicator size={"large"} color={"red"} />
+          ) : (
+            <Carousel
+              width={width}
+              loop={false}
+              height={width * 1.5}
+              autoPlay={false}
+              data={dataBanner.slice(0, 10)}
+              onSnapToItem={(index) => setActiveIndex(index)}
+              renderItem={({ item }) => (
+                <Card>
+                  <Card.Cover
+                    style={{ borderRadius: 0, height: width * 1.5 }}
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: "absolute",
+                      bottom: 10,
+                      left: 10,
+                      right: 10,
+                      margin: 10,
+                    }}
+                  >
+                    <Vrow align="center">
+                      <Ionicons
+                        name="star"
+                        color={"gold"}
+                        size={20}
+                        style={{ marginBottom: 5 }}
+                      />
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 18,
+                          fontFamily: "Montserrat_500Medium",
+                          marginBottom: 5,
+                          left: 5,
+                          textShadowColor: "black",
+                          textShadowOffset: { width: 1, height: 1 },
+                          textShadowRadius: 10,
+                        }}
+                      >
+                        {item.vote_average.toFixed(1)} / 10
+                      </Text>
+                    </Vrow>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 20,
+                        fontFamily: "Montserrat_700Bold",
+                        textShadowColor: "black",
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 10,
+                      }}
+                    >
+                      {item.title || item.original_name}
+                    </Text>
+                    <Vrow align="center" paddingTop="15px">
+                      <TouchableOpacity
+                        onPress={() => {
+                          const isTvSeries = item.original_name ? true : false;
+                          navigation.navigate("detail", {
+                            movieId: item.id,
+                            isTvSeries,
+                          });
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: "red",
+                            width: 200,
+                            height: 50,
+                            borderRadius: 20,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: "white",
+                              fontSize: 18,
+                              fontFamily: "Montserrat_700Bold",
+                            }}
+                          >
+                            Watch Now
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                      <IconButton
+                        icon={heart ? "bookmark" : "bookmark-outline"}
+                        iconColor={heart ? "white" : "white"}
+                        style={{ backgroundColor: "red", left: 5 }}
+                        onPress={() => heartHandle(item.id)}
+                      />
+                    </Vrow>
+                  </View>
+                </Card>
+              )}
+            />
+          )}
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 10,
+          }}
+        >
+          {dataBanner.slice(0, 10).map((_, index) => (
+            <View
+              key={index}
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 99,
-                backgroundColor: "gray",
+                width: 20,
+                height: 10,
+                borderRadius: 5,
+                margin: 5,
+                backgroundColor: index === activeIndex ? "red" : "gray",
               }}
             />
-          </Vrow>
+          ))}
         </View>
         <View>
           <Vrow justifyContent="space-between" align="center">
@@ -148,7 +319,7 @@ export default function Home() {
                   justifyContent: "center",
                 }}
               >
-                <ActivityIndicator size={"large"} color={"tomato"} />
+                <ActivityIndicator size={"large"} color={"red"} />
               </View>
             )}
           </Vrow>
@@ -223,7 +394,7 @@ export default function Home() {
                   justifyContent: "center",
                 }}
               >
-                <ActivityIndicator size={"large"} color={"tomato"} />
+                <ActivityIndicator size={"large"} color={"red"} />
               </View>
             )}
           </Vrow>
@@ -301,7 +472,7 @@ export default function Home() {
                   justifyContent: "center",
                 }}
               >
-                <ActivityIndicator size={"large"} color={"tomato"} />
+                <ActivityIndicator size={"large"} color={"red"} />
               </View>
             )}
           </Vrow>

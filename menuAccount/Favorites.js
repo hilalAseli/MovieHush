@@ -145,7 +145,7 @@ export default function Favorites() {
           backgroundColor: "black",
         }}
       >
-        <ActivityIndicator size="large" color="tomato" />
+        <ActivityIndicator size="large" color="red" />
       </View>
     );
   }
@@ -161,12 +161,18 @@ export default function Favorites() {
           paddingHorizontal: 30,
         }}
       >
-        <Vcol align='center'>
+        <Vcol align="center">
           <Image
             source={require("../assets/Empty-bro.png")}
             style={{ width: 300, height: 300 }}
           />
-          <Text style={{ fontFamily: "Poppins_400Regular", color: "white",fontSize:14 }}>
+          <Text
+            style={{
+              fontFamily: "Poppins_400Regular",
+              color: "white",
+              fontSize: 14,
+            }}
+          >
             Anda belum menambahkan apapun ke favorite
           </Text>
         </Vcol>
@@ -265,7 +271,7 @@ export default function Favorites() {
                     >
                       <Text
                         style={{
-                          color: "tomato",
+                          color: "red",
                           fontFamily: "Poppins_400Regular",
                           fontSize: 14,
                           marginTop: 5,
